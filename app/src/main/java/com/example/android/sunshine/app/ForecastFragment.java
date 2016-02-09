@@ -251,8 +251,7 @@ forecastJsonStr="{\"jarr\" : "+forecastJsonStr+"}";
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
             }
-//
-//            // This will only happen if there was an error getting or parsing the forecast.
+
             return null;
         }
 
@@ -263,7 +262,7 @@ forecastJsonStr="{\"jarr\" : "+forecastJsonStr+"}";
                 for(Post dayForecastStr : result) {
                     mForecastAdapter.add(dayForecastStr);
                 }
-                // New data is back from the server.  Hooray!
+
             }
         }
     }
