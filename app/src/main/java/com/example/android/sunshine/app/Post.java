@@ -3,7 +3,8 @@ package com.example.android.sunshine.app;
 /**
  * Created by A.K ABHI on 09-02-2016.
  */
-public class Post { public int userId;
+public class Post {
+    public int userId;
     public int id;
     public String title;
     public String body;

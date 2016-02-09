@@ -26,7 +26,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import org.json.JSONArray;
@@ -40,8 +39,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Vector;
 
 /**
@@ -49,7 +46,7 @@ import java.util.Vector;
  */
 public class ForecastFragment extends Fragment {
 
-    private ArrayAdapter<String> mForecastAdapter;
+    private PostsAdapter mForecastAdapter;
 
     public ForecastFragment() {
     }
@@ -85,26 +82,14 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         // Create some dummy data for the ListView.  Here's a sample weekly forecast
-        String[] data = {
-                "Mon 6/23 - Sunny - 31/17",
-                "Tue 6/24 - Foggy - 21/8",
-                "Wed 6/25 - Cloudy - 22/17",
-                "Thurs 6/26 - Rainy - 18/11",
-                "Fri 6/27 - Foggy - 21/10",
-                "Sat 6/28 - TRAPPED IN WEATHERSTATION - 23/18",
-                "Sun 6/29 - Sunny - 20/7"
-        };
-        List<String> weekForecast = new ArrayList<String>(Arrays.asList(data));
+
+        ArrayList<Post> arrayOfPosts = new ArrayList<Post>();
 
         // Now that we have some dummy forecast data, create an ArrayAdapter.
         // The ArrayAdapter will take data from a source (like our dummy forecast) and
         // use it to populate the ListView it's attached to.
         mForecastAdapter =
-                new ArrayAdapter<String>(
-                        getActivity(), // The current context (this activity)
-                        R.layout.list_item_forecast, // The name of the layout ID.
-                        R.id.list_item_forecast_textview, // The ID of the textview to populate.
-                        weekForecast);
+                new PostsAdapter(getActivity(),arrayOfPosts);
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
@@ -164,7 +149,7 @@ forecastJsonStr="{\"jarr\" : "+forecastJsonStr+"}";
                 userId = post.getInt(USER_ID);
                 title = post.getString(TITLE);
                 body = post.getString(BODY);
-                posts.add(new Post(id, userId, title, body));
+                posts.add(new Post(userId,id,title,body));
 
             }
 
@@ -276,7 +261,7 @@ forecastJsonStr="{\"jarr\" : "+forecastJsonStr+"}";
             if (result != null) {
                 mForecastAdapter.clear();
                 for(Post dayForecastStr : result) {
-                    mForecastAdapter.add(dayForecastStr.title);
+                    mForecastAdapter.add(dayForecastStr);
                 }
                 // New data is back from the server.  Hooray!
             }
