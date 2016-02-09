@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,6 +48,7 @@ import java.util.Vector;
 public class ForecastFragment extends Fragment {
 
     private PostsAdapter mForecastAdapter;
+    private ProgressBar spinner;
 
     public ForecastFragment() {
     }
@@ -92,12 +94,20 @@ public class ForecastFragment extends Fragment {
                 new PostsAdapter(getActivity(),arrayOfPosts);
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
+        spinner = (ProgressBar)rootView.findViewById(R.id.progressBar);
         // Get a reference to the ListView, and attach this adapter to it.
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
 
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+        weatherTask.execute("");
+
     }
 
     public class FetchWeatherTask extends AsyncTask<String, Void, Vector<Post>> {
@@ -256,6 +266,13 @@ forecastJsonStr="{\"jarr\" : "+forecastJsonStr+"}";
         }
 
         @Override
+        protected void onPreExecute() {
+//            super.onPreExecute();
+
+            spinner.setVisibility(View.VISIBLE);
+        }
+
+        @Override
         protected void onPostExecute(Vector<Post> result) {
             if (result != null) {
                 mForecastAdapter.clear();
@@ -263,6 +280,7 @@ forecastJsonStr="{\"jarr\" : "+forecastJsonStr+"}";
                     mForecastAdapter.add(dayForecastStr);
                 }
 
+                spinner.setVisibility(View.GONE);
             }
         }
     }
