@@ -39,10 +39,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Encapsulates fetching the forecast and displaying it as a {@link ListView} layout.
@@ -115,19 +115,10 @@ public class ForecastFragment extends Fragment {
         return rootView;
     }
 
-    public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
+    public class FetchWeatherTask extends AsyncTask<String, Void, Vector<Post>> {
 
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
-        /* The date/time conversion code is going to be moved outside the asynctask later,
-         * so for convenience we're breaking it out into its own method now.
-         */
-        private String getReadableDateString(long time){
-            // Because the API returns a unix timestamp (measured in seconds),
-            // it must be converted to milliseconds in order to be converted to valid date.
-            SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
-            return shortenedDateFormat.format(time);
-        }
 
         /**
          * Prepare the weather high/lows for presentation.
@@ -146,7 +137,7 @@ public class ForecastFragment extends Fragment {
          * Fortunately parsing is easy:  constructor takes the JSON string and converts it
          * into an Object hierarchy for us.
          */
-        private String[] getWeatherDataFromJson(String forecastJsonStr)
+        private Vector<Post> getWeatherDataFromJson(String forecastJsonStr)
                 throws JSONException {
 
             final String ID = "id";
@@ -159,7 +150,7 @@ forecastJsonStr="{\"jarr\" : "+forecastJsonStr+"}";
             JSONObject forecastJson = new JSONObject(forecastJsonStr);
             JSONArray jsonArray = forecastJson.getJSONArray("jarr");
 //            JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
-                String[] posts = new String[jsonArray.length()];
+               Vector<Post> posts = new Vector<Post>(jsonArray.length());
                 for(int i = 0; i < jsonArray.length(); i++) {
 
                 int id;
@@ -173,20 +164,20 @@ forecastJsonStr="{\"jarr\" : "+forecastJsonStr+"}";
                 userId = post.getInt(USER_ID);
                 title = post.getString(TITLE);
                 body = post.getString(BODY);
-                posts[i]=cncat(id,userId,title,body);
+                posts.add(new Post(id, userId, title, body));
 
             }
 
 
 
-            for (String s : posts) {
-                Log.v(LOG_TAG, "Forecast entry: " + s);
+            for (Post s : posts) {
+                Log.v(LOG_TAG, "Forecast entry: " + cncat(s.id,s.userId,s.title,s.body));
             }
             return posts;
 
         }
         @Override
-        protected String[] doInBackground(String... params) {
+        protected Vector<Post> doInBackground(String... params) {
 
             // If there's no zip code, there's nothing to look up.  Verify size of params.
             if (params.length == 0) {
@@ -281,11 +272,11 @@ forecastJsonStr="{\"jarr\" : "+forecastJsonStr+"}";
         }
 
         @Override
-        protected void onPostExecute(String[] result) {
+        protected void onPostExecute(Vector<Post> result) {
             if (result != null) {
                 mForecastAdapter.clear();
-                for(String dayForecastStr : result) {
-                    mForecastAdapter.add(dayForecastStr);
+                for(Post dayForecastStr : result) {
+                    mForecastAdapter.add(dayForecastStr.title);
                 }
                 // New data is back from the server.  Hooray!
             }
